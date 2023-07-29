@@ -1,35 +1,65 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import "../global.css";
+import { PlusCircle, Trash } from "@phosphor-icons/react";
+import styles from "./App.module.css";
+import { Header } from "./components/Header";
+import { Input } from "./Input";
+import { Tarefa } from "./components/Tarefa";
+import { SetStateAction, useState } from "react";
+import { EmptyList } from "./components/EmptyList";
 
 function App() {
-  const [count, setCount] = useState(0)
 
+  const[addtask, setAddTask]=useState([]);
+  const [valueFromInput, setValueFromInput]= useState([]);
+
+  function addNewTask(event: { preventDefault: () => void; }){
+    event?.preventDefault();
+    setAddTask([...addtask, valueFromInput])
+    
+  }
+
+  function handleInput(event: { target: { value: SetStateAction<string>; }; }){
+    event.target.setCustomValidity('');
+    setValueFromInput(event.target.value);
+      
+  }
+
+  function deletTask(taskToDelete){
+    const taskWithoutDeletedOne= addtask.filter((task)=>{
+      return task !== taskToDelete;
+    });
+    setAddTask(taskWithoutDeletedOne)
+  }
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div>
+      <Header />
+      <div className={styles.wrapper}>
+        <form onSubmit={addNewTask} className={styles.inputContainer}>
+          <Input value={valueFromInput} handleInput={handleInput}/>
+          <button>
+            Criar <PlusCircle size={18} />
+          </button>
+        </form>
+        <div className={styles.displayTarefasContainer}>
+          <div className={styles.statistics}>
+            <div className={styles.tarefasConcluidas}>
+              Tarefas criadas <span>{addtask.length}</span>
+            </div>
+            <div className={styles.tarefasCriadas}>
+              Concluídas <span> 2 de {addtask.length}</span>
+            </div>
+          </div>
+          {(addtask.length=== 0)? <EmptyList/> : (<div className={styles.tarefas}>
+            {addtask.map((task,id) =>{
+              return (
+                <Tarefa key={id} content={task} onDeleteTask={deletTask} id={id} />              )
+            })}
+          </div>)}
+          
+        </div>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    </div>
+  );
 }
 
-export default App
+export default App;
